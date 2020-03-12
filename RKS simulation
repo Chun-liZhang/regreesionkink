@@ -1,0 +1,92 @@
+/*
+
+"simulation of my time-varying procedure For RK model"
+
+Written by
+
+Lixiong Yang
+
+*/
+
+
+new;cls;
+R=5;
+
+aa=zeros(R,3);
+for ii(1,R,1);
+
+
+@  load procedures and data                  @
+
+#include rks_est.prc;
+#include tv_thr_est.prc;
+
+
+@generating data_simulate@
+
+T=100;
+
+ tt=seqa(1,1,T); /*trend, 1 to T*/
+   q1=rndn(T,1);/*2*pi*k*t/T*/
+   q2=rndn(T,1);
+ rt=1+1*q1+1*q2;/*threshold value*/
+ q=0+2*rndn(T,1);/*=x,threshold variable*/
+ 
+ x=q;
+ e=rndn(T,1);
+
+cc=ones(T,1);
+
+x1=zeros(T,1);x2=zeros(T,1);
+
+x1=(x-rt).*(q.<=rt);
+x2=(x-rt).*(q.>rt);
+
+
+
+
+z=rndn(T,1);
+
+y=1*x1+2*x2+0+1*z+e;
+
+
+
+dat=y~x~q~z~q1~q2;
+yi=1;
+xi=2;
+zi=4;
+qi=3;
+qi1=5;qi2=6;
+na  = { depvar, Indep, z, threshold };
+h=1;
+
+
+
+kk=2;
+{q1hat,ups1hat,ups2hat,b1,ssr}= rks_est(dat,na,yi,xi,qi,qi1,qi2,zi,h,kk);
+
+
+aa[ii,1]=q1hat;
+aa[ii,2]=ups1hat;
+aa[ii,3]=ups2hat;
+
+
+endfor;
+
+"aa=" aa;
+
+"true n1=" sumc((q.<=rt));
+
+
+@xx=x1~x2;
+x=xx~ones(T,1);
+mi = invpd(moment(x,0));/*moment(x,0)=x'x*/
+beta = mi*(x'y);/*inv(x'x)x'y*/
+e=y-x*beta;
+ssr=e'e;
+"beta-ture=" beta;
+"ssr=" ssr;@
+
+
+
+
